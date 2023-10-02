@@ -4,36 +4,37 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    // Components:
-    private Rigidbody2D rb;
+    private Vector3 direction;
+    public float gravity = -9.8f;
+    public float strength = 5f;
 
-    // Variables:
-    [SerializeField] private float power;
-    private float defaultGravity;
-
-    // Start is called before the first frame update
-    void Start()
+    private void Update()
     {
-        rb = GetComponent<Rigidbody2D>();
-        defaultGravity = rb.gravityScale;
+        if (Input.GetMouseButtonDown(0))
+        {
+            direction = Vector3.up * strength;
+        }
+
+        if (Input.touchCount > 0)
+        {
+            Touch touch = Input.GetTouch(0);
+
+            if (touch.phase == TouchPhase.Began)
+            {
+                direction = Vector3.up * strength;
+            }
+        }
+
+        direction.y += gravity * Time.deltaTime;
+        transform.position += direction * Time.deltaTime;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (collision.CompareTag("Respawn"))
         {
-            rb.gravityScale = 0;
-
-            rb.AddForce(Vector2.up * power);
-
-            rb.gravityScale = defaultGravity;
-            Debug.Log("Space");
+            GameManager.instance.GameOver();
         }
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        GameManager.instance.GameOver();
-    }
 }
